@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { ModalDiv, ModalOverlay } from './Modal.styled';
-
+//test
 export const Modal = ({ showPicture, searchName, closeModal }) => {
   function onCloseModal(e) {
     if (e.code === 'Escape' || e.target === e.currentTarget) {
