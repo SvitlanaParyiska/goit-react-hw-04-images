@@ -1,103 +1,65 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import Notiflix from 'notiflix';
 import { getAllImages } from 'api/images';
 import { Searchbar } from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Loader/Loader';
 import Button from './Button/Button';
-import { Modal } from './Modal/Modal';
 import { Body } from './App.styled';
 
-export class App extends Component {
-  state = {
-    searchItem: '',
-    searchArr: [],
-    loading: false,
-    isShowModal: false,
-    page: 1,
-    totalSearchItems: 0,
-    showPicture: '',
-  };
+export const App = () => {
+  const [searchItem, setSearchItem] = useState('');
+  const [searchArr, setSearchArr] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalSearchItems, setTotalSearchItems] = useState(0);
 
-  componentDidUpdate(_, prevState) {
-    const { searchItem, page } = this.state;
-
-    if (prevState.searchItem !== searchItem || page !== prevState.page) {
-      if (!searchItem) {
-        Notiflix.Report.info('Fill in the search param!');
-        return;
-      }
-      this.setState({ loading: true });
-      getAllImages(searchItem, page)
-        .then(data =>
-          this.setState({
-            searchArr:
-              page === 1 ? data.hits : [...prevState.searchArr, ...data.hits],
-            totalSearchItems: data.totalHits,
-          })
-        )
-        .catch(error => Notiflix.Report.failure(error.message))
-        .finally(() => this.setState({ loading: false }));
+  useEffect(() => {
+    if (searchItem === '') {
+      return;
     }
-  }
+    setLoading(true);
+    getAllImages(searchItem, page)
+      .then(data => {
+        if (data.hits.length === 0) {
+          return Notiflix.Report.info('Sorry! Images not found...');
+        }
+        setSearchArr(prevState =>
+          page === 1 ? data.hits : [...prevState, ...data.hits]
+        );
+        setTotalSearchItems(data.totalHits);
+      })
+      .catch(error => Notiflix.Report.failure(error.message))
+      .finally(() => setLoading(false));
+  }, [searchItem, page]);
 
-  searchSubmit = searchItem => {
-    this.setState({ searchItem: searchItem, page: 1 });
+  const searchSubmit = searchItemForm => {
+    setSearchItem(searchItemForm);
+    setPage(1);
   };
 
-  pageUp = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const pageUp = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  showModal = largePicture => {
-    this.setState({ isShowModal: true, showPicture: largePicture });
-  };
-
-  closeModal = () => {
-    this.setState({ isShowModal: false, showPicture: '' });
-  };
-
-  render() {
-    const {
-      searchItem,
-      searchArr,
-      loading,
-      isShowModal,
-      totalSearchItems,
-      showPicture,
-    } = this.state;
-    return (
-      <Body>
-        <Searchbar onSubmit={this.searchSubmit} />
-        {searchArr.length > 0 ? (
-          <ImageGallery
-            searchArr={searchArr}
-            searchName={searchItem}
-            showModal={this.showModal}
-          />
-        ) : (
-          <p
-            style={{
-              padding: 100,
-              textAlign: 'center',
-              fontSize: 30,
-            }}
-          >
-            Image gallery is empty...
-          </p>
-        )}
-        {loading && <Loader />}
-        {searchArr.length !== totalSearchItems && (
-          <Button pageUp={this.pageUp} />
-        )}
-        {isShowModal && (
-          <Modal
-            showPicture={showPicture}
-            searchName={searchItem}
-            closeModal={this.closeModal}
-          />
-        )}
-      </Body>
-    );
-  }
-}
+  return (
+    <Body>
+      <Searchbar onSubmit={searchSubmit} />
+      {searchArr.length > 0 ? (
+        <ImageGallery searchArr={searchArr} searchName={searchItem} />
+      ) : (
+        <p
+          style={{
+            padding: 100,
+            textAlign: 'center',
+            fontSize: 30,
+          }}
+        >
+          Image gallery is empty...
+        </p>
+      )}
+      {loading && <Loader />}
+      {searchArr.length !== totalSearchItems && <Button pageUp={pageUp} />}
+    </Body>
+  );
+};

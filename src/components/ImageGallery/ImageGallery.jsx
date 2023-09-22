@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import { ImageGalleryList } from './ImageGallery.styled';
 
-const ImageGallery = ({ searchArr, searchName, showModal }) => {
+const ImageGallery = ({ searchArr, searchName }) => {
   return (
     <ImageGalleryList>
       {searchArr.map(el => (
@@ -12,7 +12,6 @@ const ImageGallery = ({ searchArr, searchName, showModal }) => {
           picture={el.webformatURL}
           largePicture={el.largeImageURL}
           searchName={searchName}
-          showModal={showModal}
         />
       ))}
     </ImageGalleryList>
@@ -22,7 +21,6 @@ const ImageGallery = ({ searchArr, searchName, showModal }) => {
 ImageGallery.propTypes = {
   searchArr: PropTypes.array.isRequired,
   searchName: PropTypes.string.isRequired,
-  showModal: PropTypes.func.isRequired,
 };
 
 export default ImageGallery;

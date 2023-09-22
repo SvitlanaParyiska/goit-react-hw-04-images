@@ -1,5 +1,5 @@
 import React from 'react';
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Notiflix from 'notiflix';
 import {
@@ -11,46 +11,44 @@ import {
 } from './Searchbar.styled';
 import { FcSearch } from 'react-icons/fc';
 
-export class Searchbar extends Component {
-  state = {
-    searchItem: '',
+export const Searchbar = ({ onSubmit }) => {
+  const [searchItem, setSearchItem] = useState('');
+
+  const handleSearchItemChange = event => {
+    setSearchItem(event.target.value.toLowerCase());
   };
 
-  handleSearchItemChange = event => {
-    this.setState({ searchItem: event.currentTarget.value.toLowerCase() });
-  };
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
-    if (this.state.searchItem.trim() === '') {
+    if (searchItem.trim() === '') {
       Notiflix.Report.info('Fill in the search param!');
+      return;
     }
-    this.props.onSubmit(this.state.searchItem);
-    this.setState({ searchItem: '' });
+    onSubmit(searchItem);
+    setSearchItem('');
   };
 
-  render() {
-    return (
-      <Header>
-        <SearchForm onSubmit={this.handleSubmit}>
-          <SearchFormButton type="submit">
-            <FcSearch />
-            <SearchFormButtonLabel>Search</SearchFormButtonLabel>
-          </SearchFormButton>
-          <SearchFormInput
-            className="input"
-            type="text"
-            autoComplete="off"
-            name="searchItem"
-            value={this.state.searchItem}
-            onChange={this.handleSearchItemChange}
-            autoFocus
-            placeholder="Search images and photos"
-          />
-        </SearchForm>
-      </Header>
-    );
-  }
-}
+  return (
+    <Header>
+      <SearchForm onSubmit={handleSubmit}>
+        <SearchFormButton type="submit">
+          <FcSearch />
+          <SearchFormButtonLabel>Search</SearchFormButtonLabel>
+        </SearchFormButton>
+        <SearchFormInput
+          className="input"
+          type="text"
+          autoComplete="off"
+          name="searchItem"
+          value={searchItem}
+          onChange={handleSearchItemChange}
+          autoFocus
+          placeholder="Search images and photos"
+        />
+      </SearchForm>
+    </Header>
+  );
+};
 
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,
