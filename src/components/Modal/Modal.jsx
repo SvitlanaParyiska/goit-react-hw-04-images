@@ -4,18 +4,18 @@ import { useEffect } from 'react';
 import { ModalDiv, ModalOverlay } from './Modal.styled';
 
 export const Modal = ({ showPicture, searchName, closeModal }) => {
+  function onCloseModal(e) {
+    if (e.code === 'Escape' || e.target === e.currentTarget) {
+      closeModal();
+    }
+  }
+
   useEffect(() => {
     window.addEventListener('keydown', onCloseModal);
     return () => {
       window.removeEventListener('keydown', onCloseModal);
     };
-  }, []);
-
-  const onCloseModal = e => {
-    if (e.code === 'Escape' || e.target === e.currentTarget) {
-      closeModal();
-    }
-  };
+  });
 
   return (
     <ModalOverlay onClick={onCloseModal}>
