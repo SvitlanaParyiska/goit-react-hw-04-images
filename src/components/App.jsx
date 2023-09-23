@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useLayoutEffect } from 'react';
 import Notiflix from 'notiflix';
 import { getAllImages } from 'api/images';
 import { Searchbar } from './Searchbar/Searchbar';
@@ -42,13 +42,19 @@ export const App = () => {
     }
   }, [searchItem, page]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (searchItem === '') {
       return;
     }
     setLoading(true);
     getImages();
-  }, [searchItem, getImages]);
+    if (page === 1) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'instant',
+      });
+    }
+  }, [searchItem, page, getImages]);
 
   const searchSubmit = searchItemForm => {
     setSearchItem(searchItemForm);
