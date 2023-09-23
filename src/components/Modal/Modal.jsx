@@ -2,27 +2,36 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { ModalDiv, ModalOverlay } from './Modal.styled';
-//test
-export const Modal = ({ showPicture, searchName, closeModal }) => {
-  function onCloseModal(e) {
-    if (e.code === 'Escape' || e.target === e.currentTarget) {
-      closeModal();
-    }
-  }
+import { createPortal } from 'react-dom';
 
+const modalRoot = document.querySelector('#modal-root');
+
+export const Modal = ({ showPicture, alt, closeModal }) => {
   useEffect(() => {
+    function onCloseModal({ code }) {
+      if (code === 'Escape') {
+        closeModal();
+      }
+    }
     window.addEventListener('keydown', onCloseModal);
     return () => {
       window.removeEventListener('keydown', onCloseModal);
     };
-  });
+  }, [closeModal]);
 
-  return (
-    <ModalOverlay onClick={onCloseModal}>
+  const handlerCloseModal = ({ target, currentTarget }) => {
+    if (target === currentTarget) {
+      closeModal();
+    }
+  };
+
+  return createPortal(
+    <ModalOverlay onClick={handlerCloseModal}>
       <ModalDiv>
-        <img src={showPicture} alt={searchName} />
+        <img src={showPicture} alt={alt} />
       </ModalDiv>
-    </ModalOverlay>
+    </ModalOverlay>,
+    modalRoot
   );
 };
 

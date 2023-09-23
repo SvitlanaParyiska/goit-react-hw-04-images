@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Notiflix from 'notiflix';
 import { getAllImages } from 'api/images';
 import { Searchbar } from './Searchbar/Searchbar';
@@ -12,26 +12,43 @@ export const App = () => {
   const [searchArr, setSearchArr] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalSearchItems, setTotalSearchItems] = useState(0);
+  const [showBtn, setShowBtn] = useState(false);
+
+  const getNormalizedPhotos = arr => {
+    return arr.map(({ id, webformatURL, tags, largeImageURL }) => ({
+      id,
+      tags,
+      webformatURL,
+      largeImageURL,
+    }));
+  };
+
+  const getImages = useCallback(async () => {
+    try {
+      const { hits, totalHits } = await getAllImages(searchItem, page);
+      if (hits.length === 0) {
+        return Notiflix.Report.info('Sorry! Images not found...');
+      }
+      setSearchArr(prevState =>
+        page === 1
+          ? getNormalizedPhotos(hits)
+          : [...prevState, ...getNormalizedPhotos(hits)]
+      );
+      setShowBtn(hits.length < totalHits);
+    } catch (error) {
+      Notiflix.Report.failure(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchItem, page]);
 
   useEffect(() => {
     if (searchItem === '') {
       return;
     }
     setLoading(true);
-    getAllImages(searchItem, page)
-      .then(data => {
-        if (data.hits.length === 0) {
-          return Notiflix.Report.info('Sorry! Images not found...');
-        }
-        setSearchArr(prevState =>
-          page === 1 ? data.hits : [...prevState, ...data.hits]
-        );
-        setTotalSearchItems(data.totalHits);
-      })
-      .catch(error => Notiflix.Report.failure(error.message))
-      .finally(() => setLoading(false));
-  }, [searchItem, page]);
+    getImages();
+  }, [searchItem, getImages]);
 
   const searchSubmit = searchItemForm => {
     setSearchItem(searchItemForm);
@@ -46,7 +63,7 @@ export const App = () => {
     <Body>
       <Searchbar onSubmit={searchSubmit} />
       {searchArr.length > 0 ? (
-        <ImageGallery searchArr={searchArr} searchName={searchItem} />
+        <ImageGallery searchArr={searchArr} />
       ) : (
         <p
           style={{
@@ -59,7 +76,7 @@ export const App = () => {
         </p>
       )}
       {loading && <Loader />}
-      {searchArr.length !== totalSearchItems && <Button pageUp={pageUp} />}
+      {showBtn && <Button pageUp={pageUp} />}
     </Body>
   );
 };

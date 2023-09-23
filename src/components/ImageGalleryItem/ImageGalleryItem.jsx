@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { ImageItem, Image } from './ImageGalleryItem.styled';
 import { Modal } from 'components/Modal/Modal';
 
-const ImageGalleryItem = ({ picture, largePicture, searchName }) => {
+const ImageGalleryItem = ({ picture, largePicture, alt }) => {
   const [showPicture, setShowPicture] = useState('');
   const [isShowModal, setIsShowModal] = useState(false);
 
@@ -20,17 +20,9 @@ const ImageGalleryItem = ({ picture, largePicture, searchName }) => {
 
   return (
     <ImageItem>
-      <Image
-        src={picture}
-        alt={searchName}
-        onClick={() => showModal(largePicture)}
-      />
+      <Image src={picture} alt={alt} onClick={() => showModal(largePicture)} />
       {isShowModal && (
-        <Modal
-          showPicture={showPicture}
-          searchName={searchName}
-          closeModal={closeModal}
-        />
+        <Modal showPicture={showPicture} alt={alt} closeModal={closeModal} />
       )}
     </ImageItem>
   );
@@ -39,7 +31,7 @@ const ImageGalleryItem = ({ picture, largePicture, searchName }) => {
 ImageGalleryItem.propTypes = {
   picture: PropTypes.string.isRequired,
   largePicture: PropTypes.string.isRequired,
-  searchName: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
 };
 
 export default ImageGalleryItem;
